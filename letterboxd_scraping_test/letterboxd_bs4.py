@@ -6,7 +6,7 @@ import requests
 import pandas as pd
 import functions as f
 
-# URL da página do filme
+# URL da página do filme no Letterboxd
 url_base = "https://letterboxd.com/film/hermanoteu-in-the-land-of-godah/"
 
 page_count = 1
@@ -23,7 +23,7 @@ while True:
     page_data = []
     table = soup.find_all("li", class_="film-detail")
     
-    print(f"Scanneando página {page_count}")
+    print(f"Escaneando página {page_count}")
     for each_review in table:
         user_name = each_review.find(class_="name").text.strip()
         # Chama função em functions.py para conseguir o número da nota
