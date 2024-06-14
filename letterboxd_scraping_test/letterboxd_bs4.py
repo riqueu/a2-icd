@@ -12,7 +12,7 @@ def get_data(url, pages = 0):
     page_ammount = pages
     page_count = 1
 
-    headers = ["Username", "Score", "Review"] #dps... , "review date", "coiso legal", "outro coiso legal", "bleblebleh"]
+    headers = ["Username", "Date", "Score", "Review"] #dps... , "review date", "coiso legal", "outro coiso legal", "bleblebleh"]
     df = pd.DataFrame(columns=headers)
 
     while True:
@@ -27,6 +27,7 @@ def get_data(url, pages = 0):
 
         for each_review in table:
             user_name = each_review.find(class_="name").text.strip()
+            date = each_review.find(class_="_nobr").text.strip()
             
             # Chama função em functions_scrapping.py para conseguir o número da nota
             score = f.get_score(each_review.find(class_="attribution"))
