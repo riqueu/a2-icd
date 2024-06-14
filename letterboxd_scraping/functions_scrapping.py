@@ -1,5 +1,6 @@
 """Módulo com funções utilizadas no scrapping"""
 
+from datetime import datetime
 from bs4 import BeautifulSoup
 import re
 
@@ -21,3 +22,13 @@ def get_review(review_entrada):
     if spoilers_string in review:
         review = review[60::]
     return review
+
+
+def convert_date(date_str):
+    """Função que converte a data do formato em string
+    (ex: 26 Jan 2017) para o formato YYYY/MM/DD"""
+    try:
+        date_obj = datetime.strptime(date_str, "%d %b %Y")
+        return date_obj.strftime("%Y/%m/%d")
+    except:
+        return "Date Not Accessible"
