@@ -17,8 +17,8 @@ def get_data(url, pages = 0):
 
     while True:
         print(f"Escaneando página {page_count}")
-        # Cada Iteração é uma pagina com várias reviews
-        url_page = url_base + "reviews/page/" + str(page_count)
+        # Cada Iteração é uma pagina com várias reviews (mais engajadas -> menos engajadas)
+        url_page = url_base + "reviews/by/activity/page/" + str(page_count)
         page = requests.get(url_page)
         soup = BeautifulSoup(page.text, "lxml")
         

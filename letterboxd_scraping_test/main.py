@@ -8,8 +8,9 @@ try:
     url = sys.argv[1]
     # Valor padrão (todas) caso não seja um inteiro positivo ou seja vazio o argv[2].
     page_ammount = 0
-    if sys.argv[2] and int(sys.argv[2]) >= 1:
-        page_ammount = int(sys.argv[2])
+    if len(sys.argv) >= 3:
+        if int(sys.argv[2]) >= 1:
+            page_ammount = int(sys.argv[2])
 except:
     print("Erro de execução:")
     print("Uso: python main.py [url do filme] [paginas a ler] (opcional, padrão = todas)")
