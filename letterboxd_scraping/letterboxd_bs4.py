@@ -55,6 +55,7 @@ def get_data(url, pages = 0):
         
         # Se não há próxima página ou chegou no limite dado, quebra o loop.
         if not soup.find("a", class_="next") or page_count == page_ammount:
+            print("Análise Concluida")
             break
         page_count += 1
     
@@ -62,8 +63,9 @@ def get_data(url, pages = 0):
     df = df[df["Score"] != "Unrated"]
     df = df[df["Date"]  != "Date Not Accessible"]
     # Cria a Coluna da diferença entre elemento e média e arredonda para 2 casas decimais
-    df["Deviation from the Mean"] = abs(df["Score"] - df["Score"].mean())
-    df['Deviation from the Mean'] = df['Deviation from the Mean'].astype(float).round(2)
+    # OBJETIVO: Verificar se análise está com a nota acima ou abaixo da média geral das reviews analisadas.
+    df["Deviation from the Mean"] = df["Score"] - df["Score"].mean()
+    df["Deviation from the Mean"] = df["Deviation from the Mean"].astype(float).round(2)
     
     return df
 

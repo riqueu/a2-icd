@@ -18,5 +18,8 @@ except:
 
 # Função para pegar dataframe com dados
 df = letterboxd.get_data(url, page_ammount)
+
+# TODO: GPT IMPLEMENTATION
+
 # Função que cria o arquivo csv com os dados
 letterboxd.create_csv(url, df)
