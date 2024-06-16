@@ -1,10 +1,11 @@
 import openai as ai
 import pandas as pd
 
+# Pega chave da API do txt gpt_api.txt
 file = open("gpt_api.txt", "r")
 key_gpt = file.read()
 
-client = ai.OpenAI(api_key="sk-proj-E654f2NNIYhVnMSuWRzvT3BlbkFJrAidSyfoXD0raVkttQhi")
+client = ai.OpenAI(api_key=key_gpt)
 
 # TODO: TESTAR!!!
 
