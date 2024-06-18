@@ -6,6 +6,15 @@ import pandas as pd
 import functions_scrapping as f
 
 def get_film_url(film_name, year_release = None):
+    """Função que recebe string com nome do filme (e ano, opcionalmente) e retorna seu link no letterboxd
+
+    Args:
+        film_name (str): Nome do Filme
+        year_release (Union[int, None], optional): Ano do filme (para filmes que tem nome de outro filme). Defaults to None.
+
+    Returns:
+        str: url do filme no site Letterboxd
+    """
     search_query = f"{film_name} {year_release}" if year_release else film_name
     search_query = search_query.replace(" ", "+")
     search_url = f"https://letterboxd.com/search/{search_query}/"
@@ -32,13 +41,22 @@ def get_film_url(film_name, year_release = None):
     # Caso nenhum link seja encontrado, retorna None
     return None
 
-def get_data_reviews(url, pages = 25):
+def get_data_reviews(url, pages):
+    """_summary_
+
+    Args:
+        url (str): url da pagina do filme no Letterboxd
+        pages (int): quantidade de paginas a serem analisadas.
+
+    Returns:
+        DataFrame: dataframe com as informações das reviews analisadas
+    """
     # Atribui o input a variaveis locais
     url_base = url
     page_ammount = pages
     page_count = 1
 
-    headers = ["Username", "Date", "Score", "Review"] #dps..., "coiso legal", "outro coiso legal", "bleblebleh"]
+    headers = ["Username", "Date", "Score", "Review", "Length"]
     df = pd.DataFrame(columns=headers)
 
     while True:
@@ -67,7 +85,7 @@ def get_data_reviews(url, pages = 25):
                 user_name = "Unnamed"
             
             # Cria row_data e dá append dessa review na lista de reviews da pagina
-            row_data = {'Username': user_name, 'Date': date, 'Score': score, 'Review': review}
+            row_data = {'Username': user_name, 'Date': date, 'Score': score, 'Review': review, 'Length': len(review)}
             page_data.append(row_data)
         
         # Cria o dataframe temporário com as reviews dessa pagina e o concatena no principal
@@ -96,6 +114,12 @@ def get_data_reviews(url, pages = 25):
     return df
 
 def create_xlsx(df, tipo):
+    """Função que cria arquivos Excel
+
+    Args:
+        df (DataFrame): dataframe de entrada
+        tipo (str): df das informações do filme ou das reviews dele
+    """
     if tipo == "reviews":
         df.to_excel("reviews.xlsx") 
         print("Arquivo Excel criado em reviews.xlsx!")
@@ -106,6 +130,14 @@ def create_xlsx(df, tipo):
         print("Tipo de arquivo não encontrado.")
 
 def get_movie_info(url):
+    """Função para conseguir nome, ano, diretor, e duração do filme
+
+    Args:
+        url (str): url do filme Letterboxd
+
+    Returns:
+        list: lista com essas informações
+    """
     page = requests.get(url)
     soup = BeautifulSoup(page.text, "lxml")
     
@@ -116,15 +148,3 @@ def get_movie_info(url):
     runtime = soup.find(class_="text-link text-footer").text.strip()
     page_data.append(int(''.join([c for c in runtime if c.isdigit()])))
     return page_data
-
-
-"""def create_csv_reviews(url, df):
-    # Encontra o nome do filme na URL para criar o .csv
-    match = re.search(r"/film/([^/]+)/", url)
-    if match:
-        film_name = match.group(1)
-        # Troca - para _ para nomear o .csv
-        film_name = re.sub(r"-", "_", film_name)
-
-    df.to_csv(f"reviews_{film_name}.csv")
-    print(f"CSV criado em reviews_{film_name}.csv!")"""

@@ -22,7 +22,7 @@ while True:
         if page_ammount.strip() == '':
             page_ammount = 15
         # Valida quantidade de paginas, se invalida, itera novamente
-        elif int(page_ammount) >= 24 or int(page_ammount <= 0):
+        elif int(page_ammount) >= 24 or int(page_ammount) <= 0:
             print("Invalid page ammount")
             continue
         else:

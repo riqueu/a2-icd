@@ -9,12 +9,11 @@ _ = load_dotenv(find_dotenv())
 
 client = ai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
+# MÉTODO ANTIGO:
 # Pega chave da API do txt gpt_api.txt
 """file = open("gpt_api.txt", "r")
 key_gpt = file.read()
 client = ai.OpenAI(api_key=key_gpt)"""
-
-# TODO: TESTAR!!!
 
 def get_response(prompt, max_tokens=150, model="gpt-3.5-turbo-0125", temperature = 0):
     response = client.chat.completions.create(
@@ -34,7 +33,6 @@ def append_reviews_to_prompt(prompt, reviews):
     return prompt
 
 def summary_based_on_reviews(name, reviews):
-    # TODO: REVISAR E MELHORAR E COMENTAR
     prompt = f"""Based on user reviews on Letterboxd, 
     give me a brief summary of {name} (IN ENGLISH):\n"""
     prompt = append_reviews_to_prompt(prompt, reviews)
@@ -43,7 +41,6 @@ def summary_based_on_reviews(name, reviews):
 
 
 def summary_public_opinion(name, mean, reviews):
-    # TODO: REVISAR E MELHORAR E COMENTAR
     prompt = f"""Public opinion on {name} based on:\n
     Average score: {mean:.2f}\n
     and the following reviews:\n"""
@@ -53,7 +50,6 @@ def summary_public_opinion(name, mean, reviews):
 
 
 def keywords_for_movie(name, reviews):
-    # TODO: REVISAR E MELHORAR E COMENTAR
     prompt = f"""Keywords (IN ENGLISH) that describe {name} based on its reviews, 
     please separate each keyword with a '-' and DO NOT use line breaks, only spaces and dashes, 
     example: 'ironical - funny - introspective - ...':\n"""
