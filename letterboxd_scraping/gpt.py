@@ -52,7 +52,7 @@ def summary_public_opinion(mean, reviews):
 
 def keywords_for_movie(reviews):
     # TODO: REVISAR E MELHORAR E COMENTAR
-    prompt = "Keywords that describe this movie based on its reviews, please separate each keyword with ' - ', example: 'good - funny - ...':\n"
+    prompt = "Keywords that describe this movie based on its reviews, please separate each keyword with a '-', example: 'good - funny - ...':\n"
     prompt = append_reviews_to_prompt(prompt, reviews)
 
     return get_response(prompt)

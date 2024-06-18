@@ -6,7 +6,7 @@ import requests
 import pandas as pd
 import functions_scrapping as f
 
-def get_data(url, pages = 0):
+def get_data_reviews(url, pages = 25):
     # Atribui o input a variaveis locais
     url_base = url
     page_ammount = pages
@@ -55,7 +55,7 @@ def get_data(url, pages = 0):
         
         # Se não há próxima página ou chegou no limite dado, quebra o loop.
         if not soup.find("a", class_="next") or page_count == page_ammount:
-            print("Análise Concluida")
+            print("Dados coletados")
             break
         page_count += 1
     
@@ -69,7 +69,28 @@ def get_data(url, pages = 0):
     
     return df
 
-def create_csv(url, df):
+def create_csv(df, tipo):
+    if tipo == "reviews":
+        df.to_csv("reviews.csv") 
+        print("CSV criado em reviews.csv!")
+    elif tipo == "movie_info":
+        df.to_csv("filme.csv")
+        print("CSV criado em filme.csv!")
+    else:
+        print("Tipo de arquivo não encontrado.")
+
+def get_movie_info(url):
+    page = requests.get(url)
+    soup = BeautifulSoup(page.text, "lxml")
+    
+    page_data = []
+    page_data.append(soup.find(class_="headline-1 filmtitle").text.strip())
+    page_data.append(soup.find(class_="releaseyear").text.strip())
+    page_data.append(soup.find(class_="contributor").text.strip())
+    return page_data
+
+
+"""def create_csv_reviews(url, df):
     # Encontra o nome do filme na URL para criar o .csv
     match = re.search(r"/film/([^/]+)/", url)
     if match:
@@ -77,5 +98,5 @@ def create_csv(url, df):
         # Troca - para _ para nomear o .csv
         film_name = re.sub(r"-", "_", film_name)
 
-    df.to_csv(f"dados_{film_name}.csv")
-    print(f"CSV criado em dados_{film_name}.csv!")
+    df.to_csv(f"reviews_{film_name}.csv")
+    print(f"CSV criado em reviews_{film_name}.csv!")"""
