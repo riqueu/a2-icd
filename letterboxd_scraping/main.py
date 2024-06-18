@@ -32,9 +32,9 @@ movie_data = []
 
 # Pega informações sobre o filme, incluindo algumas geradas pelo GPT, baseando-se nas reviews
 name, year, director = general_info[0], general_info[1], general_info[2]
-summary = summary_based_on_reviews(reviews)
-public_opinion = summary_public_opinion(mean, reviews)
-keywords = keywords_for_movie(reviews)
+summary = summary_based_on_reviews(name, reviews)
+public_opinion = summary_public_opinion(name, mean, reviews)
+keywords = keywords_for_movie(name, reviews)
 data_dict = {'Name': name, 'Year': year, 'Director': director, 'Mean': mean,
             'Summary': summary, 'Public Opinion': public_opinion, 'Keywords': keywords}
 movie_data.append(data_dict)

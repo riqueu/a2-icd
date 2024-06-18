@@ -32,17 +32,18 @@ def append_reviews_to_prompt(prompt, reviews):
 
     return prompt
 
-def summary_based_on_reviews(reviews):
+def summary_based_on_reviews(name, reviews):
     # TODO: REVISAR E MELHORAR E COMENTAR
-    prompt = "Based on user reviews on Letterboxd, give me a brief summary of this movie:\n"
+    prompt = f"""Based on user reviews on Letterboxd, 
+    give me a brief summary of {name} (IN ENGLISH):\n"""
     prompt = append_reviews_to_prompt(prompt, reviews)
 
     return get_response(prompt)
 
 
-def summary_public_opinion(mean, reviews):
+def summary_public_opinion(name, mean, reviews):
     # TODO: REVISAR E MELHORAR E COMENTAR
-    prompt = f"""Public opinion on the movie based on:\n
+    prompt = f"""Public opinion on {name} based on:\n
     Average score: {mean:.2f}\n
     and the following reviews:\n"""
     prompt = append_reviews_to_prompt(prompt, reviews)
@@ -50,9 +51,11 @@ def summary_public_opinion(mean, reviews):
     return get_response(prompt)
 
 
-def keywords_for_movie(reviews):
+def keywords_for_movie(name, reviews):
     # TODO: REVISAR E MELHORAR E COMENTAR
-    prompt = "Keywords that describe this movie based on its reviews, please separate each keyword with a '-', example: 'good - funny - ...':\n"
+    prompt = f"""Keywords (IN ENGLISH) that describe {name} based on its reviews, 
+    please separate each keyword with a '-' and DO NOT use line breaks, only spaces and dashes, 
+    example: 'ironical - funny - introspective - ...':\n"""
     prompt = append_reviews_to_prompt(prompt, reviews)
 
     return get_response(prompt)
