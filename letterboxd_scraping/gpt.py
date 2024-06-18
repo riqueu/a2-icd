@@ -1,5 +1,6 @@
+"""Módulo para geração de respostas com a API da OpenAI"""
+
 import openai as ai
-import pandas as pd
 from dotenv import load_dotenv, find_dotenv
 import os
 

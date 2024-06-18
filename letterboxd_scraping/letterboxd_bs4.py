@@ -1,10 +1,36 @@
-"""Módulo da extração de dados com o Beautiful Soup"""
+"""Módulo da extração de dados do Letterboxd"""
 
 from bs4 import BeautifulSoup
-import re
 import requests
 import pandas as pd
 import functions_scrapping as f
+
+def get_film_url(film_name, year_release = None):
+    search_query = f"{film_name} {year_release}" if year_release else film_name
+    search_query = search_query.replace(" ", "+")
+    search_url = f"https://letterboxd.com/search/{search_query}/"
+
+    # Requisição HTTP para a página de resultados de busca
+    page = requests.get(search_url)
+    soup = BeautifulSoup(page.text, "html.parser")
+
+    # Encontrando o link para o primeiro filme na lista de resultados
+    film_title_wrappers = soup.find_all("span", class_="film-title-wrapper")
+
+    if film_title_wrappers:
+        # Acessando o primeiro elemento da lista de resultados
+        first_film = film_title_wrappers[0]
+        
+        # Encontrando o link (href) dentro do elemento do filme
+        film_link = first_film.find("a", href=True)
+        
+        if film_link:
+            # Construindo o URL completo do filme
+            url_film = "https://letterboxd.com" + film_link.get("href")
+            return url_film
+    
+    # Caso nenhum link seja encontrado, retorna None
+    return None
 
 def get_data_reviews(url, pages = 25):
     # Atribui o input a variaveis locais
@@ -87,6 +113,8 @@ def get_movie_info(url):
     page_data.append(soup.find(class_="headline-1 filmtitle").text.strip())
     page_data.append(soup.find(class_="releaseyear").text.strip())
     page_data.append(soup.find(class_="contributor").text.strip())
+    runtime = soup.find(class_="text-link text-footer").text.strip()
+    page_data.append(int(''.join([c for c in runtime if c.isdigit()])))
     return page_data
 
 
