@@ -69,13 +69,13 @@ def get_data_reviews(url, pages = 25):
     
     return df
 
-def create_csv(df, tipo):
+def create_xlsx(df, tipo):
     if tipo == "reviews":
-        df.to_csv("reviews.csv") 
-        print("CSV criado em reviews.csv!")
+        df.to_excel("reviews.xlsx") 
+        print("Arquivo Excel criado em reviews.xlsx!")
     elif tipo == "movie_info":
-        df.to_csv("filme.csv")
-        print("CSV criado em filme.csv!")
+        df.to_excel("filme.xlsx")
+        print("Arquivo Excel criado em filme.xlsx!")
     else:
         print("Tipo de arquivo não encontrado.")
 

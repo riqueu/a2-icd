@@ -26,23 +26,24 @@ print("Analisando dados...")
 # Pega reviews e coloca em lista para passa-las para o GPT
 reviews = df_reviews["Review"].tolist()
 
-mean = round(df_reviews["Score"].mean(), 2)
 general_info = letterboxd.get_movie_info(url)
 movie_data = []
 
 # Pega informações sobre o filme, incluindo algumas geradas pelo GPT, baseando-se nas reviews
 name, year, director = general_info[0], general_info[1], general_info[2]
+mean = round(df_reviews["Score"].mean(), 2)
+deviation = round(df_reviews["Score"].std(), 2)
 summary = summary_based_on_reviews(name, reviews)
 public_opinion = summary_public_opinion(name, mean, reviews)
 keywords = keywords_for_movie(name, reviews)
-data_dict = {'Name': name, 'Year': year, 'Director': director, 'Mean': mean,
+data_dict = {'Name': name, 'Year': year, 'Director': director, 'Mean': mean, 'Standard Deviation': deviation,
             'Summary': summary, 'Public Opinion': public_opinion, 'Keywords': keywords}
 movie_data.append(data_dict)
 
 # Cria dataframe com as informações do filme, incluindo analises do GPT
-headers_film = ["Name", "Year", "Director", "Mean", "Summary", "Public Opinion", "Keywords"]
+headers_film = ["Name", "Year", "Director", "Mean", "Standard Deviation", "Summary", "Public Opinion", "Keywords"]
 df_film = pd.DataFrame(movie_data, columns=headers_film)
 
 # Função que cria os arquivos csv com os dados e informações do filme
-letterboxd.create_csv(df_reviews, "reviews")
-letterboxd.create_csv(df_film, "movie_info")
+letterboxd.create_xlsx(df_reviews, "reviews")
+letterboxd.create_xlsx(df_film, "movie_info")
