@@ -1,11 +1,17 @@
 import openai as ai
 import pandas as pd
+from dotenv import load_dotenv, find_dotenv
+import os
+
+# Pega chave da API do .env
+_ = load_dotenv(find_dotenv())
+
+client = ai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 # Pega chave da API do txt gpt_api.txt
-file = open("gpt_api.txt", "r")
+"""file = open("gpt_api.txt", "r")
 key_gpt = file.read()
-
-client = ai.OpenAI(api_key=key_gpt)
+client = ai.OpenAI(api_key=key_gpt)"""
 
 # TODO: TESTAR!!!
 
@@ -46,7 +52,7 @@ def summary_public_opinion(mean, reviews):
 
 def keywords_for_movie(reviews):
     # TODO: REVISAR E MELHORAR E COMENTAR
-    prompt = "Keywords that describe this movie based on its reviews:\n"
+    prompt = "Keywords that describe this movie based on its reviews, please separate each keyword with ' - ', example: 'good - funny - ...':\n"
     prompt = append_reviews_to_prompt(prompt, reviews)
 
     return get_response(prompt)
