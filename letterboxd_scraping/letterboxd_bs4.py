@@ -42,7 +42,7 @@ def get_film_url(film_name, year_release = None):
     return None
 
 def get_data_reviews(url, pages):
-    """_summary_
+    """Função que, dada url e quantidade de paginas a analisar, pega informações das reviews
 
     Args:
         url (str): url da pagina do filme no Letterboxd
