@@ -3,6 +3,7 @@
 import pandas as pd
 import letterboxd_bs4 as scrape
 from gpt import summary_based_on_reviews, summary_public_opinion, keywords_for_movie
+from box_office_bs4 import get_release_info
 
 while True:
     # Pega input com nome, ano (opcional), e quantidades de pagina a ler (opcional)
