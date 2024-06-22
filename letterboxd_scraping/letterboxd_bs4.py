@@ -4,42 +4,35 @@ from bs4 import BeautifulSoup
 import requests
 import pandas as pd
 import functions_scrapping as f
+import box_office_bs4 as box_office
+from gpt import summary_based_on_reviews, summary_public_opinion, keywords_for_movie
 
-def get_film_url(film_name, year_release = None):
-    """Função que recebe string com nome do filme (e ano, opcionalmente) e retorna seu link no letterboxd
+def get_letterboxd_urls(genres):
+    """Função que recebe um genero e retorna uma lista 
+    com os 5 urls dos 5 filmes mais populares desse genero
 
     Args:
-        film_name (str): Nome do Filme
-        year_release (Union[int, None], optional): Ano do filme (para filmes que tem nome de outro filme). Defaults to None.
-
+        genres (List): combinação de generos (2), ou (1)
+        
     Returns:
-        str: url do filme no site Letterboxd
+        List: lista com o url dos 5 filmes
     """
-    search_query = f"{film_name} {year_release}" if year_release else film_name
-    search_query = search_query.replace(" ", "+")
-    search_url = f"https://letterboxd.com/search/{search_query}/"
+    genres = genres[0:2]
+    search_query = "+".join(genres)
+    url = f"https://letterboxd.com/films/ajax/popular/genre/{search_query}/"
 
-    # Requisição HTTP para a página de resultados de busca
-    page = requests.get(search_url)
-    soup = BeautifulSoup(page.text, "html.parser")
+    page = requests.get(url)
+    soup = BeautifulSoup(page.text, "lxml")
 
-    # Encontrando o link para o primeiro filme na lista de resultados
-    film_title_wrappers = soup.find_all("span", class_="film-title-wrapper")
-
-    if film_title_wrappers:
-        # Acessando o primeiro elemento da lista de resultados
-        first_film = film_title_wrappers[0]
-        
-        # Encontrando o link (href) dentro do elemento do filme
-        film_link = first_film.find("a", href=True)
-        
-        if film_link:
-            # Construindo o URL completo do filme
-            url_film = "https://letterboxd.com" + film_link.get("href")
-            return url_film
+    tags = soup.find_all('div', attrs={'data-target-link': True})
     
-    # Caso nenhum link seja encontrado, retorna None
-    return None
+    urls = []
+    
+    for i in range(5):
+        url = "https://letterboxd.com" + tags[i]['data-target-link']
+        urls.append(url)
+    
+    return urls
 
 def get_data_reviews(url, pages):
     """Função que, dada url e quantidade de paginas a analisar, pega informações das reviews
@@ -56,7 +49,7 @@ def get_data_reviews(url, pages):
     page_ammount = pages
     page_count = 1
 
-    headers = ["Username", "Date", "Score", "Review", "Length"]
+    headers = ["Username", "Date", "Score", "Review", "Length", "Filme"]
     df = pd.DataFrame(columns=headers)
 
     while True:
@@ -85,7 +78,7 @@ def get_data_reviews(url, pages):
                 user_name = "Unnamed"
             
             # Cria row_data e dá append dessa review na lista de reviews da pagina
-            row_data = {'Username': user_name, 'Date': date, 'Score': score, 'Review': review, 'Length': len(review)}
+            row_data = {'Username': user_name, 'Date': date, 'Score': score, 'Review': review, 'Length': len(review), 'Filme': url}
             page_data.append(row_data)
         
         # Cria o dataframe temporário com as reviews dessa pagina e o concatena no principal
@@ -129,8 +122,8 @@ def create_xlsx(df, tipo):
     else:
         print("Tipo de arquivo não encontrado.")
 
-def get_movie_info(url):
-    """Função para conseguir nome, ano, diretor, e duração do filme
+def get_movie_info(url_letter, df_reviews):
+    """Função para conseguir informações gerais sobre o filme
 
     Args:
         url (str): url do filme Letterboxd
@@ -138,13 +131,39 @@ def get_movie_info(url):
     Returns:
         list: lista com essas informações
     """
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text, "lxml")
+    page_letter = requests.get(url_letter)
+    soup_letter = BeautifulSoup(page_letter.text, "lxml")
+    
+    name = soup_letter.find(class_="headline-1 filmtitle").text.strip()
+    year = int(soup_letter.find(class_="releaseyear").text.strip())
+    director = soup_letter.find(class_="contributor").text.strip()
+    runtime = soup_letter.find(class_="text-link text-footer").text.strip()
+    runtime = int(''.join([c for c in runtime if c.isdigit()]))
+    
+    reviews = df_reviews["Review"].tolist()
+    
+    mean = round(df_reviews["Score"].mean(), 2)
+    deviation = round(df_reviews["Score"].std(), 2)
+    summary = summary_based_on_reviews(name, reviews)
+    public_opinion = summary_public_opinion(name, mean, reviews)
+    keywords = keywords_for_movie(name, reviews)
+    
+    url_box = box_office.get_box_url(name, year)
+    print(name, year, url_box)
+    release_dict = box_office.get_release_info(url_box)
     
     page_data = []
-    page_data.append(soup.find(class_="headline-1 filmtitle").text.strip())
-    page_data.append(soup.find(class_="releaseyear").text.strip())
-    page_data.append(soup.find(class_="contributor").text.strip())
-    runtime = soup.find(class_="text-link text-footer").text.strip()
-    page_data.append(int(''.join([c for c in runtime if c.isdigit()])))
-    return page_data
+    
+    row_data = {'Name': name, 'Year': year, 'Director': director, 'Runtime (mins)': runtime,
+                'Mean': mean, 'Standard Deviation': deviation,'Summary': summary, 'Public Opinion': public_opinion, 
+                'Keywords': keywords}
+    row_data.update(release_dict)
+    
+    headers = ['Name', 'Year', 'Director', 'Runtime (mins)', 'Mean', 'Standard Deviation', 'Summary', 
+               'Public Opinion', 'Keywords', 'Domestic', 'International', 'Worldwide', 
+               'Domestic Oppening', 'Budget', 'Distributor', 'MPAA', 'Genres']
+    
+    page_data.append(row_data)
+    df = pd.DataFrame(page_data, columns=headers)
+    
+    return df

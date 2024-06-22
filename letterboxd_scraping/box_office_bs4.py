@@ -1,4 +1,7 @@
+"""Módulo da extração de dados do Box Office"""
+
 from bs4 import BeautifulSoup
+import pandas as pd
 import requests
 
 url_base = "https://www.boxofficemojo.com"
@@ -7,53 +10,47 @@ url_base = "https://www.boxofficemojo.com"
 def convert(name):
     return name.replace(" ", "+")
 
-def get_release_info(name, year = 0):
-    """Função que pega relações monetárias e outras informações do filme do site Box Office Mojo
+def get_box_url(name, year = 0):
+    """Função que recebe o nome e o ano de um filme e retorna a URL do filme
 
     Args:
         name (str): Nome do filme
-        year (int, optional): Ano de lançamento. Defaults to 0.
+        year (int, optional): Ano de lançamento do filme. Defaults to 0. (Pega o primeiro caso 0)
 
     Returns:
-        dict: Dicionário com informações monetárias, generos, distribuidora, etc.
+        str: URL do filme no Box Office
     """
     converted_name = convert(name)
 
-    url_page = url_base + "/search/?q=" + converted_name + " " + str(year)
+    url_page = url_base + "/search/?q=" + converted_name # + " " + str(year)
     page = requests.get(url_page)
     soup = BeautifulSoup(page.text, "lxml")
-    links = []
-    todos_links = soup.find_all("a", class_ = "a-size-medium a-link-normal a-text-bold")
-    
-    # Pega somente filmes que têm o nome que buscamos, se não houver nenhum, retorna None
-    for link in todos_links:
-        if link.text.strip() == name:
-            links.append(link)
-    if not links:
-        return None
+    for film in soup.find_all('div', class_='a-fixed-left-grid'):
+        film_name = film.find('a', class_='a-size-medium a-link-normal a-text-bold').text.strip()
+        film_year = film.find('span', class_='a-color-secondary').text.strip()
+        film_year = int(film_year[1:5]) # remove parenteses. Ex: "(2005)" -> 2005
+        if name == film_name:
+            if year != 0 and year == film_year:
+                return url_base + film.find('a', class_='a-size-medium a-link-normal a-text-bold').get('href')         
+    return None
 
-    # Se não houver ano especificado, pega o primeiro filme
-    lim = 1 if not year else len(links)
-    # Busca nos links o link certo (tem o ano igual ao ano esperado)
-    for link in links[:lim]:
-        url_movie = url_base + link.get('href')
-        page_movie = requests.get(url_movie)
-        movie_soup = BeautifulSoup(page_movie.text, "lxml")
-        
-        #Coleta o ano do filme e verifica se ele é o buscado
-        movie_year = movie_soup.find("span", class_ = "a-color-secondary").text.strip()
-        movie_year = int(movie_year[1:5]) # remove parenteses. Ex: "(2005)" -> 2005
-        # se é o ano que procuramos, quebramos o loop
-        if movie_year == year:
-            break
+def get_release_info(url):
+    """Função que pega relações monetárias e outras informações do filme do site Box Office Mojo
 
+    Args:
+        url (str): URL do filme no box office
+
+    Returns:
+        DataFrame: dataframe com as informações monetárias
+    """
+    page_movie = requests.get(url)
+    movie_soup = BeautifulSoup(page_movie.text, "lxml")
     #Com a pagina do filme certo, coleto os valores (bilheteria e orçamento) e as informacoes relevantes da producao
     info_table = movie_soup.find("div", class_ = "a-section a-spacing-none mojo-gutter mojo-summary-table")
 
-    keys = ["domestic", "international", "worldwide", "domestic_oppening", "budget", "distributor", "mpaa", "genres"]
+    keys = ["Domestic", "International", "Worldwide", "Domestic Oppening", "Budget", "Distributor", "MPAA", "Genres"]
     dict_movie = {}
     count = 0
-
 
     #Bilheteria
     box_offices = info_table.find_all(class_ = "money")
@@ -81,7 +78,6 @@ def get_release_info(name, year = 0):
             count += 1
     
     return dict_movie
-    
-# Testes: print(get_release_info("Planet of the Apes", 2001))
-# print(get_release_info("Planet of the Apes"))
-# print(get_release_info("Planet of the Apes", 1968))
+
+def get_regional_info(url):
+    pass
