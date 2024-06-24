@@ -32,6 +32,7 @@ def append_reviews_to_prompt(prompt, reviews):
 
     return prompt
 
+
 def summary_based_on_reviews(name, reviews):
     prompt = f"""Based on user reviews on Letterboxd, 
     give me a brief summary of {name} (IN ENGLISH):\n"""

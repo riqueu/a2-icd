@@ -1,6 +1,5 @@
-"""
-Módulo para exportar os dados para o excel    
-"""
+"""Módulo para exportar os dados para o excel"""
+
 import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
@@ -42,3 +41,12 @@ def update_tables(movies, reviews, box_offices):
         create_table(sheet, f"Table{sheet_name.title().replace(' ', '')}", ref)
     
     workbook.save('a2-icd\letterboxd_scraping\\results.xlsx')
+
+def create_empty_table():
+    with pd.ExcelWriter('a2-icd\letterboxd_scraping\\results.xlsx') as writer:
+        empty_df = pd.DataFrame()
+    
+    # Add empty sheets
+        empty_df.to_excel(writer, sheet_name='movies', index=False)
+        empty_df.to_excel(writer, sheet_name='reviews', index=False)
+        empty_df.to_excel(writer, sheet_name='box offices', index=False)

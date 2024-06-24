@@ -10,6 +10,7 @@ url_base = "https://www.boxofficemojo.com"
 def convert(name):
     return name.replace(" ", "+")
 
+
 def get_box_url(name, year = 0):
     """Função que recebe o nome e o ano de um filme e retorna a URL do filme
 
@@ -34,6 +35,7 @@ def get_box_url(name, year = 0):
                 return url_base + film.find('a', class_='a-size-medium a-link-normal a-text-bold').get('href')         
     return None
 
+
 def get_release_info(url):
     """Função que pega relações monetárias e outras informações do filme do site Box Office Mojo
 
@@ -48,14 +50,14 @@ def get_release_info(url):
     #Com a pagina do filme certo, coleto os valores (bilheteria e orçamento) e as informacoes relevantes da producao
     info_table = movie_soup.find("div", class_ = "a-section a-spacing-none mojo-gutter mojo-summary-table")
 
-    keys = ["Domestic", "International", "Worldwide", "Domestic Oppening", "Budget", "Distributor", "MPAA", "Genres"]
+    keys = ["Domestic", "International", "Worldwide", "Domestic Oppening", "Distributor", "MPAA", "Genres"]
     dict_movie = {}
     count = 0
 
     #Bilheteria
     box_offices = info_table.find_all(class_ = "money")
 
-    for box_office in box_offices:
+    for box_office in box_offices[:4]:
         value = box_office.text.strip()
         # Converte valores monetários para int. Ex: "$182,200,000" -> 182200000
         value = ''.join([c for c in value if c.isdigit()])
@@ -76,8 +78,33 @@ def get_release_info(url):
             dict_movie[keys[count]] = cleaned_data
             condition = 0
             count += 1
-    
     return dict_movie
 
+
 def get_regional_info(url):
-    pass
+    page = requests.get(url)
+    soup = BeautifulSoup(page.text, "lxml")
+    tables = soup.find_all('table')
+    # Remove a primeira tabela
+    tables = tables[1::]
+    headers = ["Region", "Releases", "Lifetime Gross", "Rank"]
+    df = pd.DataFrame(columns=headers)
+
+    for table in tables:
+        rows = []
+        # Extrai as linhas da tabela
+        for each_tr in table.find_all('tr')[1:]:  # Pula a primeira linha que contém os cabeçalhos
+            cells = each_tr.find_all('td')
+            row = [cell.text.strip() for cell in cells]
+            rows.append(row)
+
+        # Converte para um DataFrame do Pandas
+        df_temp = pd.DataFrame(rows, columns=headers)
+        
+        if not df.empty:
+            df = pd.concat([df, df_temp], ignore_index=True)
+            continue
+        df = df_temp
+    
+    df['Movie'] = [url for i in range(len(df.index))]
+    return df 

@@ -7,6 +7,7 @@ import functions_scrapping as f
 import box_office_bs4 as box_office
 from gpt import summary_based_on_reviews, summary_public_opinion, keywords_for_movie
 
+
 def get_letterboxd_urls(genres):
     """Função que recebe um genero e retorna uma lista 
     com os 5 urls dos 5 filmes mais populares desse genero
@@ -34,6 +35,7 @@ def get_letterboxd_urls(genres):
     
     return urls
 
+
 def get_data_reviews(url, pages):
     """Função que, dada url e quantidade de paginas a analisar, pega informações das reviews
 
@@ -53,7 +55,7 @@ def get_data_reviews(url, pages):
     df = pd.DataFrame(columns=headers)
 
     while True:
-        print(f"Escaneando página {page_count}")
+        print(f"Escaneando página {page_count}/{pages}")
         # Cada Iteração é uma pagina com várias reviews (mais engajadas -> menos engajadas)
         url_page = url_base + "reviews/by/activity/page/" + str(page_count)
         page = requests.get(url_page)
@@ -78,7 +80,7 @@ def get_data_reviews(url, pages):
                 user_name = "Unnamed"
             
             # Cria row_data e dá append dessa review na lista de reviews da pagina
-            row_data = {'Username': user_name, 'Date': date, 'Score': score, 'Review': review, 'Length': len(review), 'Filme': url}
+            row_data = {'Username': user_name, 'Date': date, 'Score': score, 'Review': review, 'Length': len(review), 'Movie': url}
             page_data.append(row_data)
         
         # Cria o dataframe temporário com as reviews dessa pagina e o concatena no principal
@@ -106,6 +108,7 @@ def get_data_reviews(url, pages):
     
     return df
 
+
 def create_xlsx(df, tipo):
     """Função que cria arquivos Excel
 
@@ -119,8 +122,12 @@ def create_xlsx(df, tipo):
     elif tipo == "movie_info":
         df.to_excel("filme.xlsx")
         print("Arquivo Excel criado em filme.xlsx!")
+    elif tipo == "regional_info":
+        df.to_excel("regional.xlsx")
+        print("Arquivo Excel criado em regional.xlsx!")
     else:
         print("Tipo de arquivo não encontrado.")
+
 
 def get_movie_info(url_letter, df_reviews):
     """Função para conseguir informações gerais sobre o filme
@@ -149,7 +156,6 @@ def get_movie_info(url_letter, df_reviews):
     keywords = keywords_for_movie(name, reviews)
     
     url_box = box_office.get_box_url(name, year)
-    print(name, year, url_box)
     release_dict = box_office.get_release_info(url_box)
     
     page_data = []
@@ -161,7 +167,7 @@ def get_movie_info(url_letter, df_reviews):
     
     headers = ['Name', 'Year', 'Director', 'Runtime (mins)', 'Mean', 'Standard Deviation', 'Summary', 
                'Public Opinion', 'Keywords', 'Domestic', 'International', 'Worldwide', 
-               'Domestic Oppening', 'Budget', 'Distributor', 'MPAA', 'Genres']
+               'Domestic Oppening', 'Distributor', 'MPAA', 'Genres']
     
     page_data.append(row_data)
     df = pd.DataFrame(page_data, columns=headers)
