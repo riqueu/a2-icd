@@ -8,6 +8,21 @@ import box_office_bs4 as box_office
 from gpt import summary_based_on_reviews, summary_public_opinion, keywords_for_movie
 
 
+def get_topics(public_opinion):
+    """Função que trata a string da opinião pública, gerada pelo gpt,
+    deixando-a em um formato adequado para o dataframe
+
+    Args:
+        public_opinion (string): String com os topicos e notas, separados por virgula, gerados pelo gpt
+
+    Returns:
+        dict: Dicionario com os topicos suas respectivas notas
+    """
+    public_opinion = public_opinion.replace(" ", "")
+    arr_topics = public_opinion.split(",")
+    arr_dict = {arr_element.split(":")[0].lower() : float(arr_element.split(":")[1]) for arr_element in arr_topics}
+    return arr_dict
+    
 def get_letterboxd_urls(genres):
     """Função que recebe um genero e retorna uma lista 
     com os 5 urls dos 5 filmes mais populares desse genero
@@ -143,7 +158,8 @@ def get_movie_info(url_letter, df_reviews):
     mean = round(df_reviews["Score"].mean(), 2)
     deviation = round(df_reviews["Score"].std(), 2)
     summary = summary_based_on_reviews(name, reviews)
-    public_opinion = summary_public_opinion(name, mean, reviews)
+    public_opinion = summary_public_opinion(name, reviews)
+    topics = get_topics(public_opinion)
     keywords = keywords_for_movie(name, reviews)
     
     url_box = box_office.get_box_url(name, year)
@@ -152,13 +168,15 @@ def get_movie_info(url_letter, df_reviews):
     page_data = []
     
     row_data = {'Name': name, 'Year': year, 'Director': director, 'Runtime (mins)': runtime,
-                'Mean': mean, 'Standard Deviation': deviation,'Summary': summary, 'Public Opinion': public_opinion, 
-                'Keywords': keywords}
+                'Mean': mean, 'Standard Deviation': deviation,'Summary': summary,
+                'Script' : topics['script'], 'VFX' : topics['vfx'], 'Casting' : topics['casting'], 'SFX' : topics['sfx'], 
+                'Editing' : topics['editing'], 'Directing' : topics['directing'], 'Keywords': keywords}
+
     row_data.update(release_dict)
     
     headers = ['Name', 'Year', 'Director', 'Runtime (mins)', 'Mean', 'Standard Deviation', 'Summary', 
-               'Public Opinion', 'Keywords', 'Domestic', 'International', 'Worldwide', 
-               'Domestic Oppening', 'Distributor', 'MPAA', 'Genres']
+               'Script', 'VFX', 'Casting', 'SFX', 'Editing', 'Directing', 'Keywords', 'Domestic', 'International',
+               'Worldwide', 'Domestic Oppening', 'Distributor', 'MPAA', 'Genres']
     
     page_data.append(row_data)
     df = pd.DataFrame(page_data, columns=headers)

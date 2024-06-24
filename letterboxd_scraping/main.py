@@ -15,8 +15,8 @@ letterboxd_urls = letter.get_letterboxd_urls(genres)
 # Cria DataFrames vazios com as headers.
 headers_reviews = ["Username", "Date", "Score", "Review", "Length", "Movie"]
 headers_films = ['Name', 'Year', 'Director', 'Runtime (mins)', 'Mean', 'Standard Deviation', 'Summary', 
-                'Public Opinion', 'Keywords', 'Domestic', 'International', 'Worldwide', 
-                'Domestic Oppening', 'Distributor', 'MPAA', 'Genres']
+                'Script', 'VFX', 'Casting', 'SFX', 'Editing', 'Directing', 'Keywords', 'Domestic',
+                'International', 'Worldwide', 'Domestic Oppening', 'Distributor', 'MPAA', 'Genres']
 df_reviews = pd.DataFrame(columns=headers_reviews)
 df_films = pd.DataFrame(columns=headers_films)
 

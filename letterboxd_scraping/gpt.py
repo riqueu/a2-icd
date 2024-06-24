@@ -41,10 +41,11 @@ def summary_based_on_reviews(name, reviews):
     return get_response(prompt)
 
 
-def summary_public_opinion(name, mean, reviews):
-    prompt = f"""Public opinion on {name} based on:\n
-    Average score: {mean:.2f}\n
-    and the following reviews:\n"""
+def summary_public_opinion(name, reviews):
+    prompt = f"""Give a score from 0 to 10 to the following topics:\n
+    Script, VFX, Casting, SFX, Editing, and Directing. \n 
+    Your answer should follow the format: "Script: X, VFX: Y, Casting: Z, SFX: A, Editing: B, Directing: C \n
+    Based on the following reviews to {name}:\n"""
     prompt = append_reviews_to_prompt(prompt, reviews)
 
     return get_response(prompt)
