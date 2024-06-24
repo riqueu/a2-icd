@@ -13,7 +13,7 @@ genres = ["action", "adventure", "animation", "comedy", "crime", "documentary", 
 letterboxd_urls = letter.get_letterboxd_urls(genres)
 
 # Cria DataFrames vazios com as headers.
-headers_reviews = ["Username", "Date", "Score", "Review", "Length", "ID"]
+headers_reviews = ["Username", "Date", "Score", "Review", "Length", "Movie"]
 headers_films = ['Name', 'Year', 'Director', 'Runtime (mins)', 'Mean', 'Standard Deviation', 'Summary', 
                 'Public Opinion', 'Keywords', 'Domestic', 'International', 'Worldwide', 
                 'Domestic Oppening', 'Distributor', 'MPAA', 'Genres']
@@ -59,6 +59,6 @@ for film in box_office_urls:
 df_regional["Region"] = df_regional["Region"].str.replace("Domestic", "United States", regex=False).str.strip()
 
 # Função que cria os arquivos csv com os dados e informações do filme
-"""letter.create_xlsx(df_reviews, "reviews")
+letter.create_xlsx(df_reviews, "reviews")
 letter.create_xlsx(df_films, "movie_info")
-letter.create_xlsx(df_regional, "regional_info")"""
+letter.create_xlsx(df_regional, "regional_info")

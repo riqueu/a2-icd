@@ -51,7 +51,7 @@ def get_data_reviews(url, pages):
     page_ammount = pages
     page_count = 1
 
-    headers = ["Username", "Date", "Score", "Review", "Length", "Filme"]
+    headers = ["Username", "Date", "Score", "Review", "Length", "Movie"]
     df = pd.DataFrame(columns=headers)
 
     while True:
@@ -116,17 +116,8 @@ def create_xlsx(df, tipo):
         df (DataFrame): dataframe de entrada
         tipo (str): df das informações do filme ou das reviews dele
     """
-    if tipo == "reviews":
-        df.to_excel("reviews.xlsx") 
-        print("Arquivo Excel criado em reviews.xlsx!")
-    elif tipo == "movie_info":
-        df.to_excel("filme.xlsx")
-        print("Arquivo Excel criado em filme.xlsx!")
-    elif tipo == "regional_info":
-        df.to_excel("regional.xlsx")
-        print("Arquivo Excel criado em regional.xlsx!")
-    else:
-        print("Tipo de arquivo não encontrado.")
+    df.to_excel(f"{tipo}.xlsx")
+    print(f"Arquivo Excel criado em {tipo}.xlsx")
 
 
 def get_movie_info(url_letter, df_reviews):
