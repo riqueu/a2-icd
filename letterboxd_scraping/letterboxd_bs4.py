@@ -23,19 +23,17 @@ def get_topics(public_opinion):
     arr_dict = {arr_element.split(":")[0].lower() : float(arr_element.split(":")[1]) for arr_element in arr_topics}
     return arr_dict
     
-def get_letterboxd_urls(genres):
+def get_letterboxd_urls(genre):
     """Função que recebe um genero e retorna uma lista 
     com os 5 urls dos 5 filmes mais populares desse genero
 
     Args:
-        genres (List): combinação de generos (2), ou (1)
+        genre (str): genero para pegar os 5
         
     Returns:
         List: lista com o url dos 5 filmes
     """
-    genres = genres[0:2]
-    search_query = "+".join(genres)
-    url = f"https://letterboxd.com/films/ajax/popular/genre/{search_query}/"
+    url = f"https://letterboxd.com/films/ajax/popular/genre/{genre}/"
 
     page = requests.get(url)
     soup = BeautifulSoup(page.text, "lxml")
@@ -68,7 +66,7 @@ def get_data_reviews(url, pages):
 
     headers = ["Username", "Date", "Score", "Review", "Length", "Movie"]
     df = pd.DataFrame(columns=headers)
-
+    
     while True:
         print(f"Escaneando página {page_count}/{pages}")
         # Cada Iteração é uma pagina com várias reviews (mais engajadas -> menos engajadas)
@@ -78,6 +76,10 @@ def get_data_reviews(url, pages):
         
         page_data = []
         table = soup.find_all("li", class_="film-detail")
+        
+        # Pega o nome do filme e remove o texto "Reviews of " e o ano
+        movie_name = soup.find("div", class_="contextual-title").text.strip()
+        movie_name = movie_name[11:-5:]
 
         for each_review in table:
             user_name = each_review.find(class_="name").text.strip()
@@ -95,12 +97,12 @@ def get_data_reviews(url, pages):
                 user_name = "Unnamed"
             
             # Cria row_data e dá append dessa review na lista de reviews da pagina
-            row_data = {'Username': user_name, 'Date': date, 'Score': score, 'Review': review, 'Length': len(review), 'Movie': url}
+            row_data = {'Username': user_name, 'Date': date, 'Score': score, 'Review': review, 'Length': len(review), 'Movie': movie_name}
             page_data.append(row_data)
         
         # Cria o dataframe temporário com as reviews dessa pagina e o concatena no principal
         df_temp = pd.DataFrame(page_data, columns=headers)
-        # Caso o df principal não exista ainda, coloca-o com as informações da primeira pagina
+        # Caso o df principal não exista ainda, colFoca-o com as informações da primeira pagina
         if df.empty:
              # Evitar FutureWarning (p/ concatenação de dataframes vazios)
             df = df_temp
@@ -109,7 +111,7 @@ def get_data_reviews(url, pages):
         
         # Se não há próxima página ou chegou no limite dado, quebra o loop.
         if not soup.find("a", class_="next") or page_count == page_ammount:
-            print("Dados coletados")
+            print(f"Dados coletados. Analisando dados de {movie_name}...")
             break
         page_count += 1
     
@@ -147,21 +149,27 @@ def get_movie_info(url_letter, df_reviews):
     page_letter = requests.get(url_letter)
     soup_letter = BeautifulSoup(page_letter.text, "lxml")
     
+    # Pega Informações básicas da página do Letterboxd
     name = soup_letter.find(class_="headline-1 filmtitle").text.strip()
     year = int(soup_letter.find(class_="releaseyear").text.strip())
     director = soup_letter.find(class_="contributor").text.strip()
     runtime = soup_letter.find(class_="text-link text-footer").text.strip()
     runtime = int(''.join([c for c in runtime if c.isdigit()]))
     
+    # Converte reviews em lista para passar pro GPT
     reviews = df_reviews["Review"].tolist()
     
+    # Outras informações importantes
     mean = round(df_reviews["Score"].mean(), 2)
     deviation = round(df_reviews["Score"].std(), 2)
     summary = summary_based_on_reviews(name, reviews)
-    public_opinion = summary_public_opinion(name, reviews)
-    topics = get_topics(public_opinion)
     keywords = keywords_for_movie(name, reviews)
     
+    # Chat GPT analisa-rá o filme (com base nos comentários) em certos critérios
+    public_opinion = summary_public_opinion(name, reviews)
+    topics = get_topics(public_opinion)
+    
+    # Pega informações do lançamento do filme no Box Office
     url_box = box_office.get_box_url(name, year)
     release_dict = box_office.get_release_info(url_box)
     
@@ -172,6 +180,7 @@ def get_movie_info(url_letter, df_reviews):
                 'Script' : topics['script'], 'VFX' : topics['vfx'], 'Casting' : topics['casting'], 'SFX' : topics['sfx'], 
                 'Editing' : topics['editing'], 'Directing' : topics['directing'], 'Keywords': keywords}
 
+    # Concatena o dicionário com o das informações de lançamento
     row_data.update(release_dict)
     
     headers = ['Name', 'Year', 'Director', 'Runtime (mins)', 'Mean', 'Standard Deviation', 'Summary', 

@@ -50,7 +50,7 @@ def get_release_info(url):
     #Com a pagina do filme certo, coleto os valores (bilheteria e orçamento) e as informacoes relevantes da producao
     info_table = movie_soup.find("div", class_ = "a-section a-spacing-none mojo-gutter mojo-summary-table")
 
-    keys = ["Domestic", "International", "Worldwide", "Domestic Oppening", "Distributor", "MPAA", "Genres"]
+    keys = ["Domestic", "International", "Worldwide", "Domestic Oppening", "Distributor", "MPAA", "Genre"]
     dict_movie = {}
     count = 0
 
@@ -60,7 +60,7 @@ def get_release_info(url):
     for box_office in box_offices[:4]:
         value = box_office.text.strip()
         # Converte valores monetários para int. Ex: "$182,200,000" -> 182200000
-        value = ''.join([c for c in value if c.isdigit()])
+        value = ''.join([charac for charac in value if charac.isdigit()])
         dict_movie[keys[count]] = int(value)
         count += 1
         
@@ -71,7 +71,7 @@ def get_release_info(url):
     condition = 0
     for info in infos:
         data = info.text.strip()
-        if data in ["Domestic Distributor", "MPAA", "Genres"]:
+        if data in ["Domestic Distributor", "MPAA", "Genre"]:
             condition = 1
         elif condition:
             cleaned_data = ' '.join(data.split()) # Evitar espaço vazio e line breaks nos generos
@@ -85,17 +85,24 @@ def get_regional_info(url):
     page = requests.get(url)
     soup = BeautifulSoup(page.text, "lxml")
     tables = soup.find_all('table')
-    # Remove a primeira tabela
+    # Remove a primeira tabela (tabela "By Release")
     tables = tables[1::]
     headers = ["Region", "Releases", "Lifetime Gross", "Rank"]
     df = pd.DataFrame(columns=headers)
+    
+    # Pega o ano do filme e remove o ano da string
+    movie_name = soup.find("h1", class_="a-size-extra-large").text.strip()
+    movie_name = movie_name[:-7:]
 
+    # Para cada tabela continental, pega as informações dos países dessa tabela
     for table in tables:
         rows = []
         # Extrai as linhas da tabela
         for each_tr in table.find_all('tr')[1:]:  # Pula a primeira linha que contém os cabeçalhos
             cells = each_tr.find_all('td')
             row = [cell.text.strip() for cell in cells]
+            # Pega o valor inteiro monetário, ex: $250,000 -> 250000
+            row[2] = ''.join([charac for charac in row[2] if charac.isdigit()])
             rows.append(row)
 
         # Converte para um DataFrame do Pandas
@@ -106,5 +113,5 @@ def get_regional_info(url):
             continue
         df = df_temp
     
-    df['Movie'] = [url for i in range(len(df.index))]
+    df['Movie'] = [movie_name for i in range(len(df.index))]
     return df 
