@@ -3,7 +3,7 @@
 import pandas as pd
 import letterboxd_bs4 as letter
 import box_office_bs4 as box
-from export_excel import update_tables
+
 
 # TODOS GENEROS:
 """genres = ["action", "adventure", "animation", "comedy", "crime", "drama",
