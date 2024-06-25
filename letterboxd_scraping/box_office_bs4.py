@@ -82,29 +82,50 @@ def get_release_info(url):
 
 
 def get_regional_info(url):
+    """Função que recolhe as informações de bilheteria do filme por país
+
+    Args:
+        url (str): URL do filme no Box Office
+
+    Returns:
+        DataFrame: df com as informações regionais do filme
+    """
     page = requests.get(url)
     soup = BeautifulSoup(page.text, "lxml")
     tables = soup.find_all('table')
-    # Remove a primeira tabela (tabela "By Release")
-    tables = tables[1::]
-    headers = ["Region", "Releases", "Lifetime Gross", "Rank"]
-    df = pd.DataFrame(columns=headers)
+    # Remove a primeira tabela (tabela "By Release") se ela existir
+    if "Original Release" in tables[0].text.strip():
+        tables = tables[1::]
+    # df = pd.DataFrame(columns=headers)
     
     # Pega o ano do filme e remove o ano da string
     movie_name = soup.find("h1", class_="a-size-extra-large").text.strip()
     movie_name = movie_name[:-7:]
+    headers = ["Region", "Gross"]
+    df = pd.DataFrame(columns=headers)
 
     # Para cada tabela continental, pega as informações dos países dessa tabela
     for table in tables:
         rows = []
         # Extrai as linhas da tabela
         for each_tr in table.find_all('tr')[1:]:  # Pula a primeira linha que contém os cabeçalhos
-            cells = each_tr.find_all('td')
-            row = [cell.text.strip() for cell in cells]
-            # Pega o valor inteiro monetário, ex: $250,000 -> 250000
-            row[2] = ''.join([charac for charac in row[2] if charac.isdigit()])
+            row = []
+            count = 1
+            for each_td in each_tr.find_all('td'):
+                # Pega País
+                if count == 1:
+                    row.append(each_td.text.strip())
+                    count += 1
+                # Pega o Gross do filme (segundo td com classe "a-text-right")
+                elif "a-text-right" in str(each_td):
+                    # Se for o que queremos, pegamos e quebramos o loop
+                    if count == 3:
+                        row.append(each_td.text.strip())
+                        break
+                    count += 1
+                # Pega o valor inteiro monetário, ex: $250,000 -> 250000
+            row[1] = ''.join([charac for charac in row[1] if charac.isdigit()])
             rows.append(row)
-
         # Converte para um DataFrame do Pandas
         df_temp = pd.DataFrame(rows, columns=headers)
         
@@ -114,4 +135,6 @@ def get_regional_info(url):
         df = df_temp
     
     df['Movie'] = [movie_name for i in range(len(df.index))]
-    return df 
+    # Troca o nome de "Domestic" para "United States" -> Box Office toma Domestic como os EUA, não o local de lançamento do filme
+    df["Region"] = df["Region"].str.replace("Domestic", "United States", regex=False).str.strip()
+    return df

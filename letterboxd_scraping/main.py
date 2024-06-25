@@ -6,11 +6,9 @@ import box_office_bs4 as box
 
 
 # TODOS GENEROS:
-"""genres = ["action", "adventure", "animation", "comedy", "crime", "drama",
+genres = ["action", "adventure", "animation", "comedy", "crime", "drama",
           "family", "fantasy", "history", "horror", "music", "mystery", "romance",
-          "science-fiction", "thriller", "war"]"""
-
-genres = ["animation", "war", "science-fiction", "music"]
+          "science-fiction", "thriller", "war"]
 
 # Verificando se é o primeiro loop de genero.
 flag_2 = True
@@ -31,7 +29,7 @@ for genre in genres:
     # Para cada filme, coleta informações das reviews e do filme
     for film in letterboxd_urls:
         
-        df_reviews_temp = letter.get_data_reviews(film, 5)
+        df_reviews_temp = letter.get_data_reviews(film, 10)
         df_films_temp = letter.get_movie_info(film, df_reviews_temp)
         
         # Caso seja a primeira iteração, cria os dataframes, caso contrário, contacena-os
@@ -62,8 +60,6 @@ for genre in genres:
             continue
         df_regional = pd.concat([df_regional, df_regional_temp], ignore_index=True)
 
-    # Troca o nome de "Domestic" para "United States" -> Box Office toma Domestic como os EUA, não o local de lançamento do filme
-    df_regional["Region"] = df_regional["Region"].str.replace("Domestic", "United States", regex=False).str.strip()
     # Coloca a coluna genre com o genero da iteração para filtrar no Excel
     df_regional["Genre"] = [genre for i in range(len(df_regional.index))]
     df_films["Genre"] = [genre for i in range(len(df_films.index))]
