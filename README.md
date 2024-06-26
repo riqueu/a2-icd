@@ -1,6 +1,8 @@
 # Analise de Dados: Letterboxd e Box Office
 Trabalho 02 de Introdução à Ciência de Dados - Análise de Avaliações e Comentários.
 
+Arquivo Excel em results.xlsx
+
 ## Grupo:
 - [Carlos Daniel de Souza Lima](https://github.com/G4me0ver23)
 - [Henrique Coelho Beltrão](https://github.com/riqueu)
