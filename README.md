@@ -30,13 +30,15 @@ Além de um gráfico apresentando a distribuição das notas (atribuidas às rev
 
 
 ---
+### Instruções para execução:
 
+- Insira a sua chave da OpenAI em um arquivo .env na pasta letterboxd_scraping, como no .env.example. Em seguida, execute o arquivo main.py e acompanhe o scraping no terminal (a execução pode demorar um tempo considerável vista a magnitude dos dados).
 
 ### Requerimentos:
 
 - Power Pivot, para o Excel
 
-E utilizamos as seguintes bibliotecas:
+E utilizamos as seguintes bibliotecas nos módulos:
 - bs4
 - pandas
 - requests
