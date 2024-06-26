@@ -32,9 +32,11 @@ Além de um gráfico apresentando a distribuição das notas (atribuidas às rev
 ---
 
 
-### Bibliotecas Usadas:
+### Requerimentos:
 
-Utilizamos as seguintes bibliotecas:
+- Power Pivot, para o Excel
+
+E utilizamos as seguintes bibliotecas:
 - bs4
 - pandas
 - requests
